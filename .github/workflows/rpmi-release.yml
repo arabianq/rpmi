@@ -70,7 +70,7 @@ jobs:
 
       - name: Prepare rpmi-git.spec
         run: |
-          cp rpmi-git.spec rpmi-git-build.spec
+          cp ./assets/rpm-specs/rpmi-git.spec rpmi-git-build.spec
           sed -i "s/@@TAG@@/${{ steps.get_info.outputs.VERSION }}/g" rpmi-git-build.spec
 
       - name: Upload spec artifact

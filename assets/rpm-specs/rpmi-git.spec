@@ -29,7 +29,7 @@ cargo build --release --locked
 
 %install
 install -Dm755 target/release/rpmi %{buildroot}%{_bindir}/rpmi
-install -Dm644 rpmi.desktop %{buildroot}%{_datadir}/applications/rpmi.desktop
+install -Dm644 assets/rpmi.desktop %{buildroot}%{_datadir}/applications/rpmi.desktop
 
 
 %files

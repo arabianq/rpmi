@@ -1,6 +1,6 @@
 # RPMI: Graphical Utility for Managing RPM Packages
 
-![rpmi-screenshot](./screenshot.png)
+![rpmi-screenshot](./assets/screenshot.png)
 
 RPMI is a simple graphical utility, developed in Rust using EGUI, designed for installing, upgrading, and removing RPM packages on Linux operating systems. It provides an intuitive interface for interacting with packages, using `dnf` as its backend.
 
