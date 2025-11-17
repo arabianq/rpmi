@@ -16,13 +16,15 @@ Source:          https://github.com/arabianq/rpmi/archive/refs/tags/%{version}.t
 BuildRequires: rust
 BuildRequires: cargo
 
+%global clean_version %(echo %{version} | sed 's/^v//')
+
 %global _description %{expand:
 Simple graphical utility that installs/upgrades/removes .rpm files built with Rust and EGUI.}
 
 %description %{_description}
 
 %prep
-%autosetup -n rpmi-%{version} -p1
+%autosetup -n rpmi-%{clean_version} -p1
 
 %build
 cargo build --release --locked
