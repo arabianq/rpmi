@@ -1,0 +1,93 @@
+name: RPMI Git Build
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+        inputs:
+            commit_id:
+                description: "Commit ID to build from"
+                required: false
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                target: [x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu]
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.inputs.commit_id || github.sha }}
+
+            - name: Install Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: stable
+                  target: ${{ matrix.target }}
+
+            - name: Cache Cargo dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      target/${{ matrix.target }}
+                  key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cargo-${{ matrix.target }}-
+                      ${{ runner.os }}-cargo-
+
+            - name: Install cross-compilation tools
+              if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu libc6-dev-arm64-cross
+
+            - name: Ensure Rust target is installed
+              run: |
+                  rustup target add ${{ matrix.target }}
+
+            - name: Configure cargo linker for aarch64
+              if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
+              run: |
+                  mkdir -p .cargo
+                  cat > .cargo/config.toml <<'EOF'
+                  [target.aarch64-unknown-linux-gnu]
+                  linker = "aarch64-linux-gnu-gcc"
+                  ar = "aarch64-linux-gnu-ar"
+                  EOF
+
+            - name: Build
+              run: cargo build --release --target ${{ matrix.target }}
+
+            - name: Get version, date, and hash
+              id: get_info
+              run: |
+                  VERSION=$(git tag | sort -V | tail -1)
+                  DATE=$(git log -1 --pretty=format:%cd --date=format:%Y%m%d)
+                  HASH=$(git rev-parse --short HEAD)
+                  echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+                  echo "DATE=$DATE" >> $GITHUB_OUTPUT
+                  echo "HASH=$HASH" >> $GITHUB_OUTPUT
+
+            - name: Prepare rpmi-git.spec
+              run: |
+                  cp rpmi-git.spec rpmi-git-build.spec
+                  sed -i "s/@@TAG@@/${{ steps.get_info.outputs.VERSION }}/g" rpmi-git-build.spec
+                  sed -i "s/@@DATE@@/${{ steps.get_info.outputs.DATE }}/g" rpmi-git-build.spec
+                  sed -i "s/@@HASH@@/${{ steps.get_info.outputs.HASH }}/g" rpmi-git-build.spec
+
+            - name: Upload spec artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: rpmi-git-spec-${{ matrix.target }}
+                  path: rpmi-git-build.spec
+
+            - name: Upload binary artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: rpmi-git-${{ matrix.target }}
+                  path: target/${{ matrix.target }}/release/rpmi
