@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=rpmi
+Comment=Simple graphical utility that installs/upgrades/removes .rpm files built with Rust and EGUI.
+TryExec=rpmi
+Exec=rpmi %u
+Terminal=false
+Type=Application
+NoDisplay=true
+MimeType=application/x-rpm;
