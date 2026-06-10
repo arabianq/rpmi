@@ -283,7 +283,7 @@ impl Application {
 }
 
 impl App for Application {
-    fn update(&mut self, ctx: &Context, _: &mut Frame) {
+    fn logic(&mut self, ctx: &egui::Context, frame: &mut Frame) {
         if let Some(process_thread) = &self.process_thread
             && let Some(process_rx) = &self.process_rx
         {
@@ -300,8 +300,10 @@ impl App for Application {
                 self.process_log.push('\n');
             }
         }
+    }
 
-        CentralPanel::default().show(ctx, |ui| {
+    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut Frame) {
+        CentralPanel::default().show(ui.ctx(), |ui| {
             if self.pkg_state.is_none() {
                 if self.pkg_state_loading_thread.is_none() {
                     self.pkg_state_loading_thread = Some(self.get_package_state());
