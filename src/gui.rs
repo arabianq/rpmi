@@ -57,12 +57,11 @@ impl Application {
     fn get_package_state(&mut self) -> JoinHandle<()> {
         let pkg_state_shared = self.pkg_state_shared.clone();
         let pkg = self.pkg.clone();
-        let thread = thread::spawn(move || {
+        thread::spawn(move || {
             let pkg_state = get_package_state(&pkg);
             let mut guard = pkg_state_shared.lock().unwrap();
             *guard = Some(pkg_state);
-        });
-        thread
+        })
     }
 
     fn start_process(&mut self) {

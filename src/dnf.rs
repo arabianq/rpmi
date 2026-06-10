@@ -43,7 +43,7 @@ pub fn get_package_state(pkg: &rpm::Package) -> PackageState {
 
     let child_stdout = child.stdout.take().expect("Couldn't take stdout");
 
-    for line in BufReader::new(child_stdout).lines().flatten() {
+    for line in BufReader::new(child_stdout).lines().map_while(Result::ok) {
         let parts: Vec<&str> = line.split_whitespace().collect();
 
         if parts.len() != 3 {
@@ -115,14 +115,14 @@ pub fn dnf_start_action(
 
         let stdout_thread = thread::spawn(move || {
             let stdout_lines = BufReader::new(child_stdout).lines();
-            for line in stdout_lines.flatten() {
+            for line in stdout_lines.map_while(Result::ok) {
                 stdout_tx.send(line).ok();
             }
         });
 
         let stderr_thread = thread::spawn(move || {
             let stderr_lines = BufReader::new(child_stderr).lines();
-            for line in stderr_lines.flatten() {
+            for line in stderr_lines.map_while(Result::ok) {
                 stderr_tx.send(line).ok();
             }
         });
