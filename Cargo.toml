@@ -24,7 +24,7 @@ eframe = { version = "0.34.3", default-features = false, features = [
     "wayland",
     "x11",
 ] }
-rpm = { version = "0.18.4", default-features = false, features = [] }
+rpm = { version = "0.25.1", default-features = false, features = [] }
 
 [profile.release]
 strip = true
