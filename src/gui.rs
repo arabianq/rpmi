@@ -4,7 +4,7 @@ use crate::utils::*;
 
 use eframe::{App, CreationContext, Frame, HardwareAcceleration, NativeOptions, run_native};
 use egui::{
-    Align, Button, CentralPanel, Color32, Context, Direction, FontFamily, Label, Layout, RichText,
+    Align, Button, CentralPanel, Color32, Direction, FontFamily, Label, Layout, RichText,
     ScrollArea, TextWrapMode, Ui, Vec2, ViewportBuilder,
     text::{LayoutJob, TextFormat, TextWrapping},
 };
@@ -283,7 +283,7 @@ impl Application {
 }
 
 impl App for Application {
-    fn logic(&mut self, ctx: &egui::Context, frame: &mut Frame) {
+    fn logic(&mut self, _ctx: &egui::Context, _frame: &mut Frame) {
         if let Some(process_thread) = &self.process_thread
             && let Some(process_rx) = &self.process_rx
         {
@@ -302,7 +302,7 @@ impl App for Application {
         }
     }
 
-    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut Frame) {
         CentralPanel::default().show_inside(ui, |ui| {
             if self.pkg_state.is_none() {
                 if self.pkg_state_loading_thread.is_none() {
