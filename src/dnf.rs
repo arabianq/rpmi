@@ -43,47 +43,45 @@ pub fn get_package_state(pkg: &rpm::Package) -> PackageState {
 
     let child_stdout = child.stdout.take().expect("Couldn't take stdout");
 
-    for line in BufReader::new(child_stdout).lines() {
-        if let Ok(line) = line {
-            let parts: Vec<&str> = line.split_whitespace().collect();
+    for line in BufReader::new(child_stdout).lines().flatten() {
+        let parts: Vec<&str> = line.split_whitespace().collect();
 
-            if parts.len() != 3 {
-                continue;
+        if parts.len() != 3 {
+            continue;
+        }
+
+        let name_splitted: Vec<&str> = parts[0].split(".").collect();
+        let (name, arch) = (name_splitted[0], name_splitted[1]);
+
+        let version_prepared = parts[1]
+            .split_once(':')
+            .map(|(_epoch, version)| version)
+            .unwrap_or(parts[1]);
+        let version_splitted: Vec<&str> = version_prepared.split("-").collect();
+        let (version, release) = (version_splitted[0], version_splitted[1]);
+
+        if pkg_name.eq(name) && pkg_arch.eq(arch) {
+            child.kill().unwrap();
+            child.wait().unwrap();
+
+            let package_entry = PackageEntry {
+                name: name.to_string(),
+                arch: arch.to_string(),
+                version: version.to_string(),
+                release: release.to_string(),
+            };
+
+            if pkg_version.eq(version) && pkg_release.eq(release) {
+                return PackageState::OldVersion;
             }
-
-            let name_splitted: Vec<&str> = parts[0].split(".").collect();
-            let (name, arch) = (name_splitted[0], name_splitted[1]);
-
-            let version_prepared = parts[1]
-                .split_once(':')
-                .map(|(_epoch, version)| version)
-                .unwrap_or(parts[1]);
-            let version_splitted: Vec<&str> = version_prepared.split("-").collect();
-            let (version, release) = (version_splitted[0], version_splitted[1]);
-
-            if pkg_name.eq(name) && pkg_arch.eq(arch) {
-                child.kill().unwrap();
-                child.wait().unwrap();
-
-                let package_entry = PackageEntry {
-                    name: name.to_string(),
-                    arch: arch.to_string(),
-                    version: version.to_string(),
-                    release: release.to_string(),
-                };
-
-                if pkg_version.eq(version) && pkg_release.eq(release) {
-                    return PackageState::OldVersion;
-                }
-                return PackageState::NewVersion(package_entry);
-            }
+            return PackageState::NewVersion(package_entry);
         }
     }
 
     child.kill().ok();
     child.wait().ok();
 
-    return PackageState::NewPackage;
+    PackageState::NewPackage
 }
 
 pub fn dnf_start_action(
@@ -117,19 +115,15 @@ pub fn dnf_start_action(
 
         let stdout_thread = thread::spawn(move || {
             let stdout_lines = BufReader::new(child_stdout).lines();
-            for line in stdout_lines {
-                if let Ok(line) = line {
-                    stdout_tx.send(line).ok();
-                }
+            for line in stdout_lines.flatten() {
+                stdout_tx.send(line).ok();
             }
         });
 
         let stderr_thread = thread::spawn(move || {
             let stderr_lines = BufReader::new(child_stderr).lines();
-            for line in stderr_lines {
-                if let Ok(line) = line {
-                    stderr_tx.send(line).ok();
-                }
+            for line in stderr_lines.flatten() {
+                stderr_tx.send(line).ok();
             }
         });
 
@@ -148,5 +142,5 @@ pub fn dnf_start_action(
         child.wait().ok();
     });
 
-    return (action_thread, rx);
+    (action_thread, rx)
 }

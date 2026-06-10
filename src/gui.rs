@@ -62,7 +62,7 @@ impl Application {
             let mut guard = pkg_state_shared.lock().unwrap();
             *guard = Some(pkg_state);
         });
-        return thread;
+        thread
     }
 
     fn start_process(&mut self) {
@@ -105,7 +105,7 @@ impl Application {
                     } else {
                         let mut value_layout_job = LayoutJob {
                             wrap: TextWrapping {
-                                max_rows: max_rows,
+                                max_rows,
                                 ..Default::default()
                             },
                             ..Default::default()
@@ -165,7 +165,7 @@ impl Application {
                     add_info_entry(
                         ui,
                         "Architecture",
-                        &self.pkg.metadata.get_arch().unwrap_or("-"),
+                        self.pkg.metadata.get_arch().unwrap_or("-"),
                         1,
                         false,
                     );
@@ -179,28 +179,28 @@ impl Application {
                     add_info_entry(
                         ui,
                         "Summary     ",
-                        &self.pkg.metadata.get_summary().unwrap_or("-"),
+                        self.pkg.metadata.get_summary().unwrap_or("-"),
                         3,
                         false,
                     );
                     add_info_entry(
                         ui,
                         "URL         ",
-                        &self.pkg.metadata.get_url().unwrap_or("-"),
+                        self.pkg.metadata.get_url().unwrap_or("-"),
                         1,
                         true,
                     );
                     add_info_entry(
                         ui,
                         "License     ",
-                        &self.pkg.metadata.get_license().unwrap_or("-"),
+                        self.pkg.metadata.get_license().unwrap_or("-"),
                         2,
                         false,
                     );
                     add_info_entry(
                         ui,
                         "Description ",
-                        &self.pkg.metadata.get_description().unwrap_or("-"),
+                        self.pkg.metadata.get_description().unwrap_or("-"),
                         5,
                         false,
                     );
