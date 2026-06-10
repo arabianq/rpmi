@@ -303,7 +303,7 @@ impl App for Application {
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut Frame) {
-        CentralPanel::default().show(ui.ctx(), |ui| {
+        CentralPanel::default().show_inside(ui, |ui| {
             if self.pkg_state.is_none() {
                 if self.pkg_state_loading_thread.is_none() {
                     self.pkg_state_loading_thread = Some(self.get_package_state());
