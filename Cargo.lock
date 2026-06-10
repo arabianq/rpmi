@@ -613,7 +613,7 @@ dependencies = [
 
 [[package]]
 name = "egui_rpm_installer"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "eframe",
  "egui",

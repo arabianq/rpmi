@@ -1,6 +1,6 @@
 [package]
 name = "egui_rpm_installer"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 authors = ["arabianq"]
 description = "Simple graphical utility that installs/upgrades/removes .rpm files built with Rust and EGUI."
